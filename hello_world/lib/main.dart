@@ -1,115 +1,92 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MaterialApp(title: 'Flutter tutorial!', home: TutorialHome()));
+class Product {
+  Product({this.name});
+  final String name;
 }
 
-class TutorialHome extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          tooltip: 'Navigation menu',
-          onPressed: null,
-        ),
-        title: Text('Example title'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.search),
-            tooltip: 'Search',
-            onPressed: null,
-          )
-        ],
-      ),
-      body: Center(
-        child: Column(
-          children: <Widget>[Text('Hello World'), Expanded(child: Counter())],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Add',
-        child: Icon(Icons.add),
-        onPressed: null,
-      ),
-    );
+typedef void CartChangedCallback(Product product, bool inCart);
+
+class ShoppingListItem extends StatelessWidget {
+  ShoppingListItem({Product product, this.inCart, this.onCartChanged})
+      : product = product,
+        super(key: ObjectKey(product));
+
+  final Product product;
+  final bool inCart;
+  final CartChangedCallback onCartChanged;
+
+  Color _getColor(BuildContext context) {
+    return this.inCart ? Colors.black54 : Theme.of(context).primaryColor;
   }
-}
 
-class MyButton extends StatelessWidget {
+  TextStyle _getTextStyle(BuildContext context) {
+    if (!this.inCart) return null;
+
+    return TextStyle(
+        color: Colors.black54, decoration: TextDecoration.lineThrough);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return ListTile(
         onTap: () {
-          print("hello");
+          this.onCartChanged(this.product, this.inCart);
         },
-        child: Container(
-          height: 36.0,
-          padding: const EdgeInsets.all(8.0),
-          margin: const EdgeInsets.symmetric(horizontal: 8.0),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5.0),
-              color: Colors.lightGreen[500]),
-          child: Center(
-            child: Text('Engage'),
-          ),
-        ));
+        leading: CircleAvatar(
+            backgroundColor: _getColor(context), child: Text(product.name[0])),
+        title: Text(product.name, style: _getTextStyle(context)));
   }
 }
 
-class CounterDisplay extends StatelessWidget {
-  CounterDisplay({this.count});
+class ShoppingList extends StatefulWidget {
+  ShoppingList({Key key, this.products}) : super(key: key);
 
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text('Count: $count');
-  }
-}
-
-class CounterIncrementor extends StatelessWidget {
-  CounterIncrementor({this.onPressed});
-
-  final VoidCallback onPressed;
+  final List<Product> products;
 
   @override
-  Widget build(BuildContext context) {
-    return RaisedButton(
-      onPressed: onPressed,
-      child: Text('Increment it!'),
-    );
-  }
+  _ShoppingListState createState() => _ShoppingListState();
 }
 
-class Counter extends StatefulWidget {
-  @override
-  _CounterState createState() => _CounterState();
-}
+class _ShoppingListState extends State<ShoppingList> {
+  Set<Product> _shoppingCart = Set<Product>();
 
-class _CounterState extends State<Counter> {
-  int _counter = 0;
-
-  void _increment() {
+  void _handleCartChanged(Product product, bool inCart) {
     setState(() {
-      this._counter++;
+      if (!inCart)
+        this._shoppingCart.add(product);
+      else
+        this._shoppingCart.remove(product);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        // RaisedButton(onPressed: this._increment, child: Text('Increment')),
-        // Text('Count: $_counter')
-        CounterIncrementor(
-          onPressed: _increment,
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Shopping list'),
         ),
-        CounterDisplay(
-          count: _counter,
-        )
-      ],
-    );
+        body: ListView(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            children: widget.products.map((Product product) {
+              return ShoppingListItem(
+                product: product,
+                inCart: this._shoppingCart.contains(product),
+                onCartChanged: this._handleCartChanged,
+              );
+            }).toList()));
   }
+}
+
+void main() {
+  runApp(MaterialApp(
+    title: 'Shopping App',
+    home: ShoppingList(
+      products: <Product>[
+        Product(name: 'Eggs'),
+        Product(name: 'Flour'),
+        Product(name: 'Chocolate chips'),
+      ],
+    ),
+  ));
 }
