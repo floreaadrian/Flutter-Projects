@@ -15,21 +15,20 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
     super.initState();
     animationController =
         AnimationController(duration: const Duration(seconds: 2), vsync: this);
-    animation = Tween<double>(begin: 0, end: 300).animate(animationController)
-      ..addStatusListener((state) => {
-            if (state == AnimationStatus.completed)
-              {animationController.reverse()}
-            else
-              if (state == AnimationStatus.dismissed)
-                {animationController.forward()}
-          })
-      ..addStatusListener((state) => print('$state'));
+    animation =
+        CurvedAnimation(parent: animationController, curve: Curves.easeIn)
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              animationController.reverse();
+            } else if (status == AnimationStatus.dismissed) {
+              animationController.forward();
+            }
+          });
     animationController.forward();
   }
 
   @override
-  Widget build(BuildContext context) =>
-      GrowTransition(animation: animation, child: LogoWidget());
+  Widget build(BuildContext context) => AnimatedLogo(animation: animation);
 
   @override
   void dispose() {
@@ -38,34 +37,24 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
   }
 }
 
-class LogoWidget extends StatelessWidget {
-  @override
+class AnimatedLogo extends AnimatedWidget {
+  static final _opacityTween = Tween<double>(begin: 0.1, end: 1.0);
+  static final _sizeTween = Tween<double>(begin: 0, end: 360);
+
+  AnimatedLogo({Key key, Animation<double> animation})
+      : super(key: key, listenable: animation);
+
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10.0),
-      child: FlutterLogo(),
-    );
-  }
-}
-
-class GrowTransition extends StatelessWidget {
-  GrowTransition({this.child, this.animation});
-
-  final Widget child;
-  final Animation<double> animation;
-
-  @override
-  Widget build(BuildContext context) {
+    final Animation<double> animation = listenable;
     return Center(
-      child: AnimatedBuilder(
-        animation: this.animation,
-        builder: (context, child) => Container(
-              height: animation.value,
-              width: animation.value,
-              child: child,
-            ),
-        child: child,
-      ),
+      child: Opacity(
+          opacity: _opacityTween.evaluate(animation),
+          child: Container(
+            margin: EdgeInsets.symmetric(vertical: 10),
+            height: _sizeTween.evaluate(animation),
+            width: _sizeTween.evaluate(animation),
+            child: FlutterLogo(),
+          )),
     );
   }
 }
