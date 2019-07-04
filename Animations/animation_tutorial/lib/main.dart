@@ -28,9 +28,8 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) => AnimatedLogo(
-        animation: animation,
-      );
+  Widget build(BuildContext context) =>
+      GrowTransition(animation: animation, child: LogoWidget());
 
   @override
   void dispose() {
@@ -39,19 +38,33 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
   }
 }
 
-class AnimatedLogo extends AnimatedWidget {
-  AnimatedLogo({Key key, Animation<double> animation})
-      : super(key: key, listenable: animation);
+class LogoWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10.0),
+      child: FlutterLogo(),
+    );
+  }
+}
+
+class GrowTransition extends StatelessWidget {
+  GrowTransition({this.child, this.animation});
+
+  final Widget child;
+  final Animation<double> animation;
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = listenable;
     return Center(
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 10),
-        height: animation.value,
-        width: animation.value,
-        child: FlutterLogo(),
+      child: AnimatedBuilder(
+        animation: this.animation,
+        builder: (context, child) => Container(
+              height: animation.value,
+              width: animation.value,
+              child: child,
+            ),
+        child: child,
       ),
     );
   }
