@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'state_container.dart';
 
 class UpdateUserScreen extends StatelessWidget {
   const UpdateUserScreen({Key key}) : super(key: key);
@@ -14,6 +15,8 @@ class UpdateUserScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final container = StateContainer.of(context);
+
     return new Scaffold(
       appBar: CupertinoNavigationBar(
         middle: Text('Editeaza sefu 🤓'),
@@ -58,6 +61,17 @@ class UpdateUserScreen extends StatelessWidget {
               var firstName = firstNameKey.currentState.value;
               var lastName = lastNameKey.currentState.value;
               var email = emailKey.currentState.value;
+              if (firstName == '') {
+                firstName = null;
+              }
+              if (lastName == '') {
+                lastName = null;
+              }
+              if (email == '') {
+                email = null;
+              }
+              container.updateUserInfo(
+                  firstName: firstName, lastName: lastName, email: email);
               Navigator.pop(context);
             }
           }),
