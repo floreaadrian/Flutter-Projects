@@ -24,8 +24,9 @@ class TaskRepository extends TaskRepositoryContract {
   }
 
   @override
-  Future<Task> findOne(int id) {
-    // TODO: implement findOne
+  Future<Task> findOne(int id) async {
+    for (int i = 0; i < listOfTask.length; ++i)
+      if (listOfTask[i].id == id) return listOfTask[i];
     return null;
   }
 

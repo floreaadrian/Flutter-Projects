@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_test/flutter_test.dart' as prefix0;
 import 'package:tdd_todo_app/features/todo_app/data/repositories/task_repository.dart';
 import 'package:tdd_todo_app/features/todo_app/domain/entities/task.dart';
 import 'package:tdd_todo_app/features/todo_app/domain/repositories/task_repository.dart';
@@ -7,15 +6,38 @@ import 'package:tdd_todo_app/features/todo_app/domain/repositories/task_reposito
 void main() {
   addTest();
   deleteTest();
+  findOneTest();
 }
 
-Future deleteTest() async {
+void findOneTest() async {
+  TaskRepositoryContract taskRepository = new TaskRepository();
+  test(
+    'should find a task',
+    () async {
+      // arrange
+      Task task = Task(
+        id: 0,
+        added: new DateTime(2017, 9, 9, 9),
+        isDone: false,
+        text: "ceva",
+      );
+      taskRepository.add(task);
+      // act
+      Task foundTask = await taskRepository.findOne(0);
+      // assert
+      expect(foundTask, task);
+      Task unfoundTask = await taskRepository.findOne(-1);
+      expect(unfoundTask, null);
+    },
+  );
+}
+
+void deleteTest() async {
   TaskRepositoryContract taskRepository = new TaskRepository();
   test(
     'should delete a task',
     () async {
       // arrange
-      taskRepository = new TaskRepository();
       Task task = Task(
         id: 0,
         added: new DateTime(2017, 9, 9, 9),
