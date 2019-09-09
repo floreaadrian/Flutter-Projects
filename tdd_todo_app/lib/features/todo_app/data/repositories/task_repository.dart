@@ -31,15 +31,18 @@ class TaskRepository extends TaskRepositoryContract {
   }
 
   @override
-  Future<List<Task>> getAll() {
-    // TODO: implement getAll
-    return null;
+  Future<List<Task>> getAll() async {
+    return listOfTask;
   }
 
   @override
-  Future<bool> update(Task task) {
-    // TODO: implement update
-    return null;
+  Future<bool> update(Task task) async {
+    for (int i = 0; i < listOfTask.length; ++i)
+      if (listOfTask[i].id == task.id) {
+        listOfTask[i] = task;
+        return true;
+      }
+    return false;
   }
 
   bool checkIfTaskInList(Task task) {

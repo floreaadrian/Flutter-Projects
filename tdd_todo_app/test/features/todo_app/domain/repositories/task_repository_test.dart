@@ -7,6 +7,71 @@ void main() {
   addTest();
   deleteTest();
   findOneTest();
+  updateTest();
+  getAllTest();
+}
+
+void getAllTest() async {
+  TaskRepositoryContract taskRepository = new TaskRepository();
+  test(
+    'should get all the task from the repository',
+    () async {
+      // arrange
+      Task task = Task(
+        id: 0,
+        added: new DateTime(2017, 9, 9, 9),
+        isDone: false,
+        text: "ceva",
+      );
+      final noneFound = await taskRepository.getAll();
+      expect(noneFound.length, 0);
+      taskRepository.add(task);
+      final foundFirst = await taskRepository.getAll();
+      expect(foundFirst[0], task);
+      Task task2 = Task(
+        id: 1,
+        added: new DateTime(2018, 9, 9, 9),
+        isDone: true,
+        text: "altceva",
+      );
+      taskRepository.add(task2);
+      final foundSecondOne = await taskRepository.getAll();
+      expect(foundSecondOne[1], task2);
+      final theRightLength = foundSecondOne.length;
+      expect(theRightLength, 2);
+    },
+  );
+}
+
+void updateTest() async {
+  TaskRepositoryContract taskRepository = new TaskRepository();
+  test(
+    'should update a task',
+    () async {
+      // arrange
+      Task task = Task(
+        id: 0,
+        added: new DateTime(2017, 9, 9, 9),
+        isDone: false,
+        text: "ceva",
+      );
+      final notFoundForUpdate = await taskRepository.update(task);
+      expect(notFoundForUpdate, false);
+      taskRepository.add(task);
+      Task taskUpdated = Task(
+        id: 0,
+        added: new DateTime(2017, 9, 9, 9),
+        isDone: false,
+        text: "altceva",
+      );
+      final isfoundForUpdate = await taskRepository.update(taskUpdated);
+      expect(isfoundForUpdate, true);
+      final isUpdatedCorectly = await taskRepository.findOne(0);
+      expect(isUpdatedCorectly, taskUpdated);
+      final checkIfUpdatedNotAdded = await taskRepository.getAll();
+      expect(checkIfUpdatedNotAdded.length, 1);
+    },
+  );
 }
 
 void findOneTest() async {
